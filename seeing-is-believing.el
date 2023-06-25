@@ -124,14 +124,20 @@ Optional FLAGS are passed to the seeing_is_believing command."
   (interactive)
   (let ((beg (if (region-active-p) (region-beginning) (point-min)))
         (end (if (region-active-p) (region-end) (point-max)))
-        (origin (point)))
+        ;(origin (point))
+        ; REF: https://github.com/lassik/emacs-live-preview/blob/603a4a1759fbec92e7a1cabc249517c78e59ce7e/live-preview.el#L96
+        (orig-line-number (line-number-at-pos))
+        (orig-column-number (current-column)))
     (run-hooks 'seeing-is-believing-before-run-hooks)
     (shell-command-on-region beg end
                              (concat seeing-is-believing-executable " "
                                      flags (seeing-is-believing~flags))
                              nil
                              'replace)
-    (goto-char origin)
+    ;(goto-char origin)
+    (goto-char (point-min))
+    (forward-line (- orig-line-number 1))
+    (move-to-column orig-column-number)
     (run-hooks 'seeing-is-believing-after-run-hooks)))
 
 ;;;###autoload
@@ -177,6 +183,7 @@ The following keybindings are created:
 
 The default prefix is \"C-c ?\"
 "
+  :lighter " SiB"
   :keymap seeing-is-believing-keymap
   :group 'seeing-is-believing)
 
